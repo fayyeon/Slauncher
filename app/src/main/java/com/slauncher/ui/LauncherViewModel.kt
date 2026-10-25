@@ -5,6 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.slauncher.data.AppModel
@@ -103,38 +108,82 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
         val resolveInfos: List<ResolveInfo> = try {
             pm.queryIntentActivities(mainIntent, 0)
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             emptyList()
         }
 
         val myPackageName = context.packageName
+
+        // Generic Android icon fallback bitmap
+        val genericDefaultBitmap: Bitmap? = try {
+            val d = ContextCompat.getDrawable(context, android.R.drawable.sym_def_app_icon)
+                ?: pm.defaultActivityIcon
+            d?.toSafeBitmap()
+        } catch (_: Throwable) {
+            null
+        }
 
         return resolveInfos
             .filter { resolveInfo ->
                 // Filter out this launcher itself
                 resolveInfo.activityInfo.packageName != myPackageName
             }
+            .distinctBy { "${it.activityInfo.packageName}/${it.activityInfo.name}" }
             .map { resolveInfo ->
                 val label = try {
                     resolveInfo.loadLabel(pm).toString()
-                } catch (_: Exception) {
+                } catch (_: Throwable) {
                     resolveInfo.activityInfo.packageName
                 }
 
-                val icon = try {
-                    resolveInfo.loadIcon(pm)
-                } catch (_: Exception) {
-                    null
+                // Check if the app actually specifies its own logo
+                val hasCustomLogo = resolveInfo.activityInfo.icon != 0 ||
+                        (resolveInfo.activityInfo.applicationInfo != null && resolveInfo.activityInfo.applicationInfo.icon != 0)
+
+                val iconBitmap: Bitmap? = if (hasCustomLogo) {
+                    try {
+                        resolveInfo.loadIcon(pm)?.toSafeBitmap() ?: genericDefaultBitmap
+                    } catch (_: Throwable) {
+                        genericDefaultBitmap
+                    }
+                } else {
+                    genericDefaultBitmap
                 }
 
                 AppModel(
                     packageName = resolveInfo.activityInfo.packageName,
                     activityName = resolveInfo.activityInfo.name,
                     label = label,
-                    icon = icon
+                    icon = iconBitmap
                 )
             }
             // Criterion 6: Alphabetical sorting (case-insensitive)
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.label })
     }
 }
+
+/**
+ * Safely converts an Android Drawable to an in-memory ARGB_8888 Bitmap.
+ * Catches all Throwables (OOM, Hardware bitmap issues, invalid intrinsic bounds).
+ */
+private fun Drawable.toSafeBitmap(): Bitmap? {
+    return try {
+        if (this is BitmapDrawable && this.bitmap != null && !this.bitmap.isRecycled) {
+            val bmp = this.bitmap
+            if (bmp.config != Bitmap.Config.HARDWARE) {
+                return bmp
+            } else {
+                return bmp.copy(Bitmap.Config.ARGB_8888, false)
+            }
+        }
+        val targetSize = 96
+        val bitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        setBounds(0, 0, targetSize, targetSize)
+        draw(canvas)
+        bitmap
+    } catch (_: Throwable) {
+        null
+    }
+}
+

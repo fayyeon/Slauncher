@@ -1,9 +1,5 @@
 package com.slauncher.ui.components
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.DropdownMenu
@@ -60,7 +57,7 @@ fun AppListItem(
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // App Icon inside circular container matching concept design
+        // App Icon inside circular container
         Box(
             modifier = Modifier
                 .size(44.dp)
@@ -68,23 +65,21 @@ fun AppListItem(
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
             contentAlignment = Alignment.Center
         ) {
-            val bitmap = remember(app.icon) { app.icon?.toBitmapOrNull() }
-            if (bitmap != null) {
+            if (app.icon != null) {
                 Image(
-                    bitmap = bitmap.asImageBitmap(),
+                    bitmap = app.icon.asImageBitmap(),
                     contentDescription = app.label,
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
                 )
             } else {
-                // Minimalist fallback letter circle
-                Text(
-                    text = app.label.take(1).uppercase(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Default,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                // Generic Android icon fallback when an app has no custom logo
+                Icon(
+                    imageVector = Icons.Rounded.Android,
+                    contentDescription = app.label,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -141,23 +136,3 @@ fun AppListItem(
     }
 }
 
-/**
- * Converts any Android Drawable (including AdaptiveIconDrawable) to a Software/ARGB_8888 Bitmap safely.
- */
-private fun Drawable.toBitmapOrNull(): Bitmap? {
-    if (this is BitmapDrawable && this.bitmap != null) {
-        return this.bitmap
-    }
-    val width = if (intrinsicWidth > 0) intrinsicWidth else 72
-    val height = if (intrinsicHeight > 0) intrinsicHeight else 72
-
-    return try {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        setBounds(0, 0, canvas.width, canvas.height)
-        draw(canvas)
-        bitmap
-    } catch (_: Exception) {
-        null
-    }
-}

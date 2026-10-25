@@ -152,7 +152,7 @@ fun LauncherScreen(
                         // App list items strictly sorted alphabetically
                         items(
                             items = filteredApps,
-                            key = { it.packageName }
+                            key = { "${it.packageName}/${it.activityName}" }
                         ) { app ->
                             AppListItem(app = app)
                         }

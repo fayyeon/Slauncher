@@ -2,7 +2,7 @@ package com.slauncher.data
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -14,7 +14,7 @@ data class AppModel(
     val packageName: String,
     val activityName: String,
     val label: String,
-    val icon: Drawable? = null
+    val icon: Bitmap? = null
 ) {
     /**
      * Launches the application.

@@ -1,8 +1,5 @@
 package com.slauncher.ui.components
 
-import android.content.Context
-import android.content.Intent
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,11 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ColorLens
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -38,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +51,6 @@ fun SettingsBottomSheet(
     onDismissRequest: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     ModalBottomSheet(
@@ -69,24 +61,24 @@ fun SettingsBottomSheet(
         dragHandle = {
             Surface(
                 modifier = Modifier
-                    .padding(vertical = 12.dp)
+                    .padding(top = 12.dp, bottom = 8.dp)
                     .size(width = 36.dp, height = 4.dp),
                 shape = RoundedCornerShape(2.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                color = MaterialTheme.colorScheme.outlineVariant
             ) {}
         }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(scrollState)
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 36.dp)
-                .verticalScroll(scrollState)
         ) {
             // Header
             Text(
                 text = stringResource(R.string.settings_title),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -147,38 +139,6 @@ fun SettingsBottomSheet(
                 description = stringResource(R.string.expressive_theming_desc),
                 checked = settings.useMaterialExpressiveTheming,
                 onCheckedChange = onExpressiveThemingChange
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Quick system shortcuts
-            Text(
-                text = stringResource(R.string.system_shortcuts),
-                style = MaterialTheme.typography.labelLarge,
-                fontFamily = FontFamily.Default,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            ActionShortcutRow(
-                icon = Icons.Rounded.Home,
-                title = stringResource(R.string.set_default_launcher),
-                description = stringResource(R.string.set_default_launcher_desc),
-                onClick = {
-                    openDefaultHomeSettings(context)
-                }
-            )
-
-            ActionShortcutRow(
-                icon = Icons.Rounded.Image,
-                title = stringResource(R.string.open_wallpaper_settings),
-                description = stringResource(R.string.open_wallpaper_settings_desc),
-                onClick = {
-                    openWallpaperPicker(context)
-                }
             )
         }
     }
@@ -270,91 +230,5 @@ private fun ToggleRow(
                 checkedTrackColor = MaterialTheme.colorScheme.primary
             )
         )
-    }
-}
-
-@Composable
-private fun ActionShortcutRow(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            modifier = Modifier.size(40.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(24.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = FontFamily.Default,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-private fun openDefaultHomeSettings(context: Context) {
-    try {
-        val intent = Intent(Settings.ACTION_HOME_SETTINGS).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    } catch (_: Exception) {
-        try {
-            val fallbackIntent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(fallbackIntent)
-        } catch (_: Exception) {
-            val appDetails = Intent(Settings.ACTION_SETTINGS).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(appDetails)
-        }
-    }
-}
-
-private fun openWallpaperPicker(context: Context) {
-    try {
-        val intent = Intent(Intent.ACTION_SET_WALLPAPER).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(Intent.createChooser(intent, "Set Wallpaper"))
-    } catch (_: Exception) {
-        // Fallback to display settings
-        val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
     }
 }
