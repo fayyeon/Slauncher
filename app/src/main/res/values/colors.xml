@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core Minimalist Palette -->
+    <color name="pure_black">#FF000000</color>
+    <color name="pure_white">#FFFFFFFF</color>
+    <color name="scrim_darken">#73000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Material Expressive Fallbacks -->
+    <color name="primary_light">#1D1B20</color>
+    <color name="surface_light">#F8F9FA</color>
+    <color name="surface_container_light">#EAEBED</color>
+    <color name="on_surface_light">#1C1B1F</color>
+
+    <color name="primary_dark">#E6E1E5</color>
+    <color name="surface_dark">#121316</color>
+    <color name="surface_container_dark">#202124</color>
+    <color name="on_surface_dark">#E6E1E5</color>
+</resources>

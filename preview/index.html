@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slauncher - Interactive Preview</title>
+  <style>
+    :root {
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-color: #000000;
+      --surface-container: #1E1E1E;
+      --search-bg: #2C2C2C;
+      --on-surface: #FFFFFF;
+      --on-surface-variant: #A0A0A0;
+      --primary: #A8C7FA;
+      --icon-bg: #FFFFFF;
+      --icon-fg: #000000;
+      --scrim-opacity: 0.65;
+      --wallpaper-img: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80');
+    }
+
+    /* Expressive Dark Theme Variables */
+    body.expressive-dark {
+      --bg-color: #121316;
+      --surface-container: #1D2024;
+      --search-bg: #282A2F;
+      --on-surface: #E2E2E9;
+      --on-surface-variant: #90909A;
+      --primary: #A8C7FA;
+      --icon-bg: #DCE2F9;
+      --icon-fg: #151B2C;
+    }
+
+    /* Expressive Light Theme Variables */
+    body.expressive-light {
+      --bg-color: #F8F9FA;
+      --surface-container: #EDEBF0;
+      --search-bg: #E3E2E6;
+      --on-surface: #1A1C1E;
+      --on-surface-variant: #5E6064;
+      --primary: #0061A4;
+      --icon-bg: #1A1C1E;
+      --icon-fg: #FFFFFF;
+    }
+
+    /* Pure Light Theme Variables */
+    body.pure-light {
+      --bg-color: #FFFFFF;
+      --surface-container: #F0F0F2;
+      --search-bg: #E4E4E6;
+      --on-surface: #000000;
+      --on-surface-variant: #555555;
+      --primary: #000000;
+      --icon-bg: #000000;
+      --icon-fg: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #0d0f12;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .preview-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .preview-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #e0e2ec;
+    }
+
+    .preview-header p {
+      font-size: 13px;
+      color: #8c9099;
+    }
+
+    /* Device mockup wrapper */
+    .device-frame {
+      width: 360px;
+      height: 740px;
+      border-radius: 44px;
+      background: #000;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 0 10px #1e2023, 0 0 0 12px #34373c;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Wallpaper layer */
+    .wallpaper-layer {
+      position: absolute;
+      inset: 0;
+      background-image: var(--wallpaper-img);
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+      display: none;
+    }
+
+    /* Darken scrim overlay */
+    .darken-scrim {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, var(--scrim-opacity));
+      z-index: 2;
+      display: none;
+    }
+
+    /* Launcher root layout */
+    .launcher-container {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-color);
+      color: var(--on-surface);
+    }
+
+    /* Status Bar */
+    .status-bar {
+      height: 40px;
+      padding: 10px 24px 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--on-surface);
+      z-index: 5;
+    }
+
+    .camera-cutout {
+      width: 12px;
+      height: 12px;
+      background: #000;
+      border-radius: 50%;
+    }
+
+    /* Scrollable App List */
+    .app-list-scroll {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 20px;
+    }
+
+    .app-list-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Samsung One UI Reachability Spacer */
+    .one-ui-spacer {
+      height: 310px; /* ~42% of screen height */
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* App Item Row */
+    .app-item {
+      display: flex;
+      align-items: center;
+      padding: 11px 24px;
+      cursor: pointer;
+    }
+
+    .app-item:active {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .app-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: var(--icon-bg);
+      color: var(--icon-fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-right: 18px;
+    }
+
+    .app-title {
+      font-size: 19px;
+      font-weight: 400;
+      color: var(--on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      padding: 10px 16px 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 6;
+      background: transparent;
+    }
+
+    /* Search Pill */
+    .search-pill {
+      flex: 1;
+      height: 54px;
+      background-color: var(--search-bg);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 10px;
+    }
+
+    .search-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+      fill: var(--on-surface);
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--on-surface);
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--on-surface-variant);
+      opacity: 0.7;
+    }
+
+    .search-clear {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0.8;
+      fill: var(--on-surface);
+    }
+
+    /* 3-dots Button */
+    .menu-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background-color: var(--search-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .menu-btn:active {
+      transform: scale(0.96);
+    }
+
+    .menu-icon {
+      width: 24px;
+      height: 24px;
+      fill: var(--on-surface);
+    }
+
+    /* Bottom Sheet Modal */
+    .bottom-sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 10;
+      display: none;
+    }
+
+    .bottom-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface-container);
+      border-radius: 28px 28px 0 0;
+      padding: 16px 20px 28px 20px;
+      z-index: 11;
+      display: none;
+      color: var(--on-surface);
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    }
+
+    .drag-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--on-surface-variant);
+      opacity: 0.4;
+      border-radius: 2px;
+      margin: 0 auto 16px auto;
+    }
+
+    .sheet-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .sheet-section {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      margin-top: 12px;
+    }
+
+    .mode-cards {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .mode-card {
+      flex: 1;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mode-card.active {
+      border-color: var(--primary);
+      background: rgba(168, 199, 250, 0.15);
+    }
+
+    .mode-card span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      cursor: pointer;
+    }
+
+    .toggle-info h4 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .toggle-info p {
+      font-size: 12px;
+      color: var(--on-surface-variant);
+    }
+
+    /* Switch Component */
+    .switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #555;
+      border-radius: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .switch.on {
+      background: var(--primary);
+    }
+
+    .switch-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+    }
+
+    .switch.on .switch-knob {
+      left: 23px;
+      background: #000;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding-top: 100px;
+      color: var(--on-surface-variant);
+      font-size: 17px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-header">
+    <h1>Slauncher (Kotlin & Compose)</h1>
+    <p>Live Interactive Prototype • Samsung One UI Reachability • M3 Expressive</p>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="deviceFrame">
+    <!-- Wallpaper Layer -->
+    <div class="wallpaper-layer" id="wallpaperLayer"></div>
+    
+    <!-- Darken Scrim Overlay -->
+    <div class="darken-scrim" id="darkenScrim"></div>
+
+    <!-- Launcher Container -->
+    <div class="launcher-container" id="launcherContainer">
+      <!-- Status Bar -->
+      <div class="status-bar">
+        <span id="clock">12:30</span>
+        <div class="camera-cutout"></div>
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+      </div>
+
+      <!-- Scrollable App List -->
+      <div class="app-list-scroll" id="appListScroll">
+        <!-- Samsung One UI Reachability Space -->
+        <div class="one-ui-spacer" id="oneUiSpacer"></div>
+
+        <div id="appsWrapper">
+          <!-- Apps dynamically populated -->
+        </div>
+
+        <div class="empty-state" id="emptyState">No apps found</div>
+      </div>
+
+      <!-- Bottom Bar with Pill Search and 3-dots Button -->
+      <div class="bottom-bar">
+        <div class="search-pill">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search" autocomplete="off" />
+          <svg class="search-clear" id="searchClear" viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </div>
+
+        <div class="menu-btn" id="menuBtn">
+          <svg class="menu-icon" viewBox="0 0 24 24">
+            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Settings Bottom Sheet -->
+      <div class="bottom-sheet-backdrop" id="sheetBackdrop"></div>
+      <div class="bottom-sheet" id="settingsSheet">
+        <div class="drag-handle"></div>
+        <div class="sheet-title">Launcher Settings</div>
+
+        <div class="sheet-section">Background Style</div>
+        <div class="mode-cards">
+          <div class="mode-card active" id="cardSolid">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            <span>Solid Color</span>
+          </div>
+          <div class="mode-card" id="cardWallpaper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h7V2H4c-1.1 0-2 .9-2 2v7h2V4zm6 9l-4 5h12l-3-4-2.03 2.71L10 13zm10-9h-7v2h7v7h2V4c0-1.1-.9-2-2-2zm0 16h-7v2h7c1.1 0 2-.9 2-2v-7h-2v7zM4 13H2v7c0 1.1.9 2 2 2h7v-2H4v-7z"/></svg>
+            <span>Wallpaper</span>
+          </div>
+        </div>
+
+        <div id="darkenOption" style="display: none;">
+          <div class="toggle-row" id="darkenToggleRow">
+            <div class="toggle-info">
+              <h4>Darken Wallpaper</h4>
+              <p>Add dim overlay for higher text contrast</p>
+            </div>
+            <div class="switch on" id="darkenSwitch">
+              <div class="switch-knob"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sheet-section">Color Tuning</div>
+        <div class="toggle-row" id="expressiveToggleRow">
+          <div class="toggle-info">
+            <h4>Material Expressive Theme</h4>
+            <p>Use dynamic palette instead of stark pure black/white</p>
+          </div>
+          <div class="switch on" id="expressiveSwitch">
+            <div class="switch-knob"></div>
+          </div>
+        </div>
+
+        <div class="sheet-section">Dark / Light Mode</div>
+        <div class="toggle-row" id="darkLightToggleRow">
+          <div class="toggle-info">
+            <h4>Dark Mode</h4>
+            <p>Toggle between system dark and light modes</p>
+          </div>
+          <div class="switch on" id="darkLightSwitch">
+            <div class="switch-knob"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Complete App dataset mirroring concept and typical Android apps
+    const APPS = [
+      "Authenticator",
+      "Camera",
+      "Clock",
+      "Contacts",
+      "File Manager",
+      "Firefox",
+      "Gallery",
+      "Gemini",
+      "Gmail",
+      "Instagram",
+      "Maps",
+      "Messages",
+      "Music",
+      "Notes",
+      "Phone",
+      "Play Store",
+      "Settings",
+      "Spotify",
+      "Telegram",
+      "WhatsApp",
+      "YouTube"
+    ];
+
+    // State
+    let isWallpaperMode = false;
+    let isDarkenOn = true;
+    let isExpressiveOn = true;
+    let isDarkMode = true;
+    let currentQuery = "";
+
+    // DOM Elements
+    const appsWrapper = document.getElementById("appsWrapper");
+    const searchInput = document.getElementById("searchInput");
+    const searchClear = document.getElementById("searchClear");
+    const emptyState = document.getElementById("emptyState");
+    const oneUiSpacer = document.getElementById("oneUiSpacer");
+    const appListScroll = document.getElementById("appListScroll");
+
+    const menuBtn = document.getElementById("menuBtn");
+    const sheetBackdrop = document.getElementById("sheetBackdrop");
+    const settingsSheet = document.getElementById("settingsSheet");
+
+    const cardSolid = document.getElementById("cardSolid");
+    const cardWallpaper = document.getElementById("cardWallpaper");
+    const darkenOption = document.getElementById("darkenOption");
+    const darkenSwitch = document.getElementById("darkenSwitch");
+    const expressiveSwitch = document.getElementById("expressiveSwitch");
+    const darkLightSwitch = document.getElementById("darkLightSwitch");
+
+    const wallpaperLayer = document.getElementById("wallpaperLayer");
+    const darkenScrim = document.getElementById("darkenScrim");
+    const launcherContainer = document.getElementById("launcherContainer");
+
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Render App List
+    function renderApps() {
+      const filtered = APPS.filter(name => 
+        name.toLowerCase().includes(currentQuery.toLowerCase().trim())
+      );
+
+      appsWrapper.innerHTML = "";
+
+      if (filtered.length === 0) {
+        emptyState.style.display = "block";
+      } else {
+        emptyState.style.display = "none";
+        filtered.forEach(appName => {
+          const item = document.createElement("div");
+          item.className = "app-item";
+          item.innerHTML = `
+            <div class="app-icon">${appName.charAt(0)}</div>
+            <div class="app-title">${appName}</div>
+          `;
+          item.onclick = () => {
+            alert(`Launched ${appName} instantly!`);
+          };
+          appsWrapper.appendChild(item);
+        });
+      }
+
+      // If user is searching, collapse the reachability spacer to 16px so results are immediately in view!
+      if (currentQuery.trim().length > 0) {
+        oneUiSpacer.style.height = "16px";
+      } else {
+        oneUiSpacer.style.height = "310px"; // Samsung One UI reachability space
+      }
+    }
+
+    // Apply Themes
+    function applyTheme() {
+      document.body.classList.remove('pure-dark', 'pure-light', 'expressive-dark', 'expressive-light');
+
+      if (isWallpaperMode) {
+        wallpaperLayer.style.display = "block";
+        launcherContainer.style.backgroundColor = "transparent";
+        darkenOption.style.display = "block";
+        darkenScrim.style.display = isDarkenOn ? "block" : "none";
+      } else {
+        wallpaperLayer.style.display = "none";
+        darkenScrim.style.display = "none";
+        darkenOption.style.display = "none";
+      }
+
+      if (isExpressiveOn) {
+        if (isDarkMode) {
+          document.body.classList.add('expressive-dark');
+        } else {
+          document.body.classList.add('expressive-light');
+        }
+      } else {
+        if (isDarkMode) {
+          document.body.classList.add('pure-dark');
+        } else {
+          document.body.classList.add('pure-light');
+        }
+      }
+
+      if (!isWallpaperMode) {
+        launcherContainer.style.backgroundColor = "var(--bg-color)";
+      }
+    }
+
+    // Search events
+    searchInput.addEventListener("input", (e) => {
+      currentQuery = e.target.value;
+      searchClear.style.display = currentQuery.length > 0 ? "flex" : "none";
+      renderApps();
+    });
+
+    searchClear.addEventListener("click", () => {
+      searchInput.value = "";
+      currentQuery = "";
+      searchClear.style.display = "none";
+      renderApps();
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const filtered = APPS.filter(name => 
+          name.toLowerCase().includes(currentQuery.toLowerCase().trim())
+        );
+        if (filtered.length > 0) {
+          alert(`Launched top match: ${filtered[0]}`);
+          searchInput.value = "";
+          currentQuery = "";
+          searchClear.style.display = "none";
+          renderApps();
+        }
+      }
+    });
+
+    // Bottom Sheet toggles
+    menuBtn.onclick = () => {
+      sheetBackdrop.style.display = "block";
+      settingsSheet.style.display = "block";
+    };
+
+    sheetBackdrop.onclick = () => {
+      sheetBackdrop.style.display = "none";
+      settingsSheet.style.display = "none";
+    };
+
+    cardSolid.onclick = () => {
+      isWallpaperMode = false;
+      cardSolid.classList.add('active');
+      cardWallpaper.classList.remove('active');
+      applyTheme();
+    };
+
+    cardWallpaper.onclick = () => {
+      isWallpaperMode = true;
+      cardWallpaper.classList.add('active');
+      cardSolid.classList.remove('active');
+      applyTheme();
+    };
+
+    darkenSwitch.onclick = () => {
+      isDarkenOn = !isDarkenOn;
+      darkenSwitch.classList.toggle('on', isDarkenOn);
+      applyTheme();
+    };
+
+    expressiveSwitch.onclick = () => {
+      isExpressiveOn = !isExpressiveOn;
+      expressiveSwitch.classList.toggle('on', isExpressiveOn);
+      applyTheme();
+    };
+
+    darkLightSwitch.onclick = () => {
+      isDarkMode = !isDarkMode;
+      darkLightSwitch.classList.toggle('on', isDarkMode);
+      applyTheme();
+    };
+
+    // Initial render
+    renderApps();
+    applyTheme();
+  </script>
+</body>
+</html>
