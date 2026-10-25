@@ -1,4 +1,4 @@
-# Slauncher - Minimalist Lightweight Android Launcher
+# Minimalist Lightweight Android Launcher
 
 A sleek, lightweight, minimalist Android launcher written in **Kotlin** and **Jetpack Compose**, implementing **Material 3 Expressive** guidelines and one-handed reachability principles.
 
@@ -19,15 +19,15 @@ A sleek, lightweight, minimalist Android launcher written in **Kotlin** and **Je
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-Slauncher/
+MinimalistLauncher/
 ├── app/
 │   ├── build.gradle.kts
 │   ├── src/main/
 │   │   ├── AndroidManifest.xml
-│   │   ├── java/com/slauncher/
+│   │   ├── java/com/minimalist/launcher/
 │   │   │   ├── MainActivity.kt               # Edge-to-edge, Package monitor receiver
 │   │   │   ├── data/
 │   │   │   │   ├── AppModel.kt               # App data model & launch/uninstall actions
@@ -55,13 +55,13 @@ Slauncher/
 
 ### 1. In Android Studio
 1. Open Android Studio.
-2. Select **Open** and choose the `Slauncher` directory.
+2. Select **Open** and choose the `MinimalistLauncher` directory.
 3. Allow Gradle to sync.
 4. Run on an Android device or emulator running **Android 8.0+ (API 26+)**, optimal on **Android 12+ (API 31+)** for dynamic color theming.
 
 ### 2. Via Command Line
 ```bash
-cd Slauncher
+cd MinimalistLauncher
 ./gradlew assembleDebug
 ```
 The output APK will be generated at:
@@ -79,6 +79,5 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 Since the app purposefully does **not** include a launcher drawer icon (Criterion 3):
 1. Open your device's **Settings**.
 2. Navigate to **Apps** → **Default apps** → **Home app**.
-3. Select **Slauncher**.
-4. Alternatively, press the Home button on your device — Android will display a prompt asking which app to use as Home. Select **Slauncher** and tap **Always**.
-
+3. Select **Minimalist Launcher**.
+4. Alternatively, press the Home button on your device — Android will display a prompt asking which app to use as Home. Select **Minimalist Launcher** and tap **Always**.
