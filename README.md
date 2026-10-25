@@ -19,7 +19,7 @@ A sleek, lightweight, minimalist Android launcher written in **Kotlin** and **Je
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MinimalistLauncher/
@@ -51,7 +51,7 @@ MinimalistLauncher/
 
 ---
 
-## 🚀 How to Build and Run
+## How to Build and Run
 
 ### 1. In Android Studio
 1. Open Android Studio.
@@ -74,7 +74,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## ⚙️ Setting as Default Launcher
+## Setting as Default Launcher
 
 Since the app purposefully does **not** include a launcher drawer icon (Criterion 3):
 1. Open your device's **Settings**.
