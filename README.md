@@ -2,36 +2,6 @@
 
 A sleek, lightweight, minimalist Android launcher written in **Kotlin** implementing **Material 3 Expressive** guidelines and one-handed reachability principles.
 
-## Project Structure
-
-```
-MinimalistLauncher/
-├── app/
-│   ├── build.gradle.kts
-│   ├── src/main/
-│   │   ├── AndroidManifest.xml
-│   │   ├── java/com/minimalist/launcher/
-│   │   │   ├── MainActivity.kt               # Edge-to-edge, Package monitor receiver
-│   │   │   ├── data/
-│   │   │   │   ├── AppModel.kt               # App data model & launch/uninstall actions
-│   │   │   │   ├── LauncherSettings.kt       # WallpaperMode & settings state
-│   │   │   │   └── SettingsRepository.kt     # SharedPreferences & StateFlow
-│   │   │   └── ui/
-│   │   │       ├── LauncherViewModel.kt      # Querying apps, sorting, search filter
-│   │   │       ├── LauncherScreen.kt         # One UI reachability, bottom bar, wallpaper
-│   │   │       ├── components/
-│   │   │       │   ├── AppListItem.kt        # Circular icon & app title item
-│   │   │       │   ├── SearchBarView.kt      # Rounded search pill & 3-dots button
-│   │   │       │   └── SettingsBottomSheet.kt# Material 3 Expressive settings sheet
-│   │   │       └── theme/
-│   │   │           ├── Color.kt              # AMOLED, Wallpaper Scrim & M3 colors
-│   │   │           ├── Type.kt               # System font typography
-│   │   │           └── Theme.kt              # Dynamic colors & AMOLED switcher
-│   │   └── res/
-│   │       ├── values/themes.xml             # windowShowWallpaper & transparent window
-│   │       └── values-night/themes.xml
-```
-
 ---
 
 ## How to Build and Run
