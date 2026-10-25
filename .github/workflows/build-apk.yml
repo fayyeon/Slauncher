@@ -25,12 +25,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build Optimized Release APK
+        run: ./gradlew assembleRelease --stacktrace
 
-      - name: Upload Debug APK Artifact
+      - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Slauncher-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: Slauncher-apk
+          path: app/build/outputs/apk/release/*.apk
           retention-days: 14
