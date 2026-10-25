@@ -1,23 +1,6 @@
 # Minimalist Lightweight Android Launcher
 
-A sleek, lightweight, minimalist Android launcher written in **Kotlin** and **Jetpack Compose**, implementing **Material 3 Expressive** guidelines and one-handed reachability principles.
-
----
-
-## Features & Criteria Fulfillment
-
-| # | Criterion | Implementation Details |
-|---|-----------|------------------------|
-| **1** | **Scrollable list instead of icon grid** | Clean vertical list built with Compose `LazyColumn`. Displays circular app icons paired with high-contrast app titles. Tap to launch instantly, long-press for App Info and Uninstall shortcuts. |
-| **2** | **3-Dots Hamburger Menu with Wallpaper & Color Controls** | Positioned at bottom right. Opens a Material 3 Expressive bottom sheet with: <br>• **Wallpaper Mode**: Transparent activity window with an optional **Darken Wallpaper** scrim toggle.<br>• **Solid Color Mode**: Automatic Dark/Light mode, with **Material Expressive Theming** toggle (dynamic wallpaper-based colors) vs Pure B&W (AMOLED).<br>• Theme-adaptive buttons. |
-| **3** | **No Launchable Icon in App Drawers** | In `AndroidManifest.xml`, registered strictly with `category.HOME` and `category.DEFAULT` — **omitting** `category.LAUNCHER`. It only activates when chosen in Android *Settings → Default Apps → Home app*. |
-| **4** | **Pill Search Bar** | Rounded search bar (`28.dp` corner radius) placed alongside the 3-dots button at the bottom. Provides real-time filtering, clear ("X") button, and keyboard Search action to launch the top match directly. |
-| **5** | **Zero Animation Code** | No `animate*AsState`, no `AnimatedVisibility`, no transitions or spring physics. Instantaneous rendering and state transitions for ultra-fast performance. |
-| **6** | **Alphabetical Sorting** | Apps queried from `PackageManager` are strictly sorted case-insensitively using `compareBy(String.CASE_INSENSITIVE_ORDER) { it.label }`. Filtered search queries maintain this ordering. |
-| **7** | **System Font Exclusively** | Typography explicitly enforces `FontFamily.Default` without any bundled or downloaded custom fonts, honoring the user's system font preference. |
-| **8** | **One-Handed Reachability** | The top of the list begins ~42% down the screen, placing the first app right in thumb reach. When the user scrolls up, the list glides up to fill the screen seamlessly. |
-
----
+A sleek, lightweight, minimalist Android launcher written in **Kotlin** implementing **Material 3 Expressive** guidelines and one-handed reachability principles.
 
 ## Project Structure
 
@@ -71,13 +54,3 @@ To install directly to a connected device:
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
-
----
-
-## Setting as Default Launcher
-
-Since the app purposefully does **not** include a launcher drawer icon (Criterion 3):
-1. Open your device's **Settings**.
-2. Navigate to **Apps** → **Default apps** → **Home app**.
-3. Select **Minimalist Launcher**.
-4. Alternatively, press the Home button on your device — Android will display a prompt asking which app to use as Home. Select **Minimalist Launcher** and tap **Always**.
