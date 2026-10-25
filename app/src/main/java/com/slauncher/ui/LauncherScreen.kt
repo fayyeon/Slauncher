@@ -2,6 +2,7 @@ package com.slauncher.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +68,13 @@ fun LauncherScreen(
 
     var showSettingsSheet by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+
+    // Scroll to top when search query updates
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
 
     // Handle back button: dismiss search or close settings
     BackHandler(enabled = searchQuery.isNotEmpty() || showSettingsSheet) {
@@ -132,21 +141,21 @@ fun LauncherScreen(
                         )
                     }
                 } else {
-                    // Samsung One UI reachability:
-                    // The list content starts at roughly ~42% of the screen height when at top.
-                    // When the user scrolls up, the spacer scrolls out of view and the apps move up.
+                    val isSearching = searchQuery.isNotEmpty()
                     val configuration = LocalConfiguration.current
                     val screenHeightDp = configuration.screenHeightDp.dp
-                    val reachabilityTopSpace = if (searchQuery.isNotEmpty()) 16.dp else (screenHeightDp * 0.42f)
 
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = if (isSearching) Arrangement.Bottom else Arrangement.Top,
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
-                        // Samsung One UI top reachability spacer
-                        item(key = "reachability_spacer") {
-                            Spacer(modifier = Modifier.height(reachabilityTopSpace))
+                        if (!isSearching) {
+                            // Samsung One UI top reachability spacer: apps start at ~42% down the screen
+                            item(key = "reachability_spacer") {
+                                Spacer(modifier = Modifier.height(screenHeightDp * 0.42f))
+                            }
                         }
 
                         // App list items strictly sorted alphabetically

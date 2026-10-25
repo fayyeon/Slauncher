@@ -164,6 +164,12 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
       padding-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-list-scroll.searching {
+      justify-content: flex-end;
     }
 
     .app-list-scroll::-webkit-scrollbar {
@@ -631,11 +637,15 @@
         });
       }
 
-      // If user is searching, collapse the reachability spacer to 16px so results are immediately in view!
+      // If user is searching, align results directly above search bar for reachability
+      const scrollContainer = document.getElementById("appListScroll");
       if (currentQuery.trim().length > 0) {
-        oneUiSpacer.style.height = "16px";
+        oneUiSpacer.style.display = "none";
+        scrollContainer.classList.add("searching");
       } else {
+        oneUiSpacer.style.display = "block";
         oneUiSpacer.style.height = "310px"; // Samsung One UI reachability space
+        scrollContainer.classList.remove("searching");
       }
     }
 
