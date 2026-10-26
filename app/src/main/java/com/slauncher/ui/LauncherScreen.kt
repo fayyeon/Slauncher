@@ -2,6 +2,9 @@ package com.slauncher.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,10 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slauncher.R
 import com.slauncher.data.WallpaperMode
+import com.slauncher.service.LockScreenService
 import com.slauncher.ui.components.AppListItem
 import com.slauncher.ui.components.LauncherBottomBar
 import com.slauncher.ui.components.SettingsBottomSheet
 import com.slauncher.ui.theme.WallpaperDarkOverlay
+import com.slauncher.ui.theme.WallpaperLightOverlay
 
 /**
  * Main Launcher Screen adhering strictly to all user criteria:
@@ -91,17 +96,27 @@ fun LauncherScreen(
         WallpaperMode.SOLID -> MaterialTheme.colorScheme.background
     }
 
+    val isDark = isSystemInDarkTheme()
+    val overlayColor = if (isDark) WallpaperDarkOverlay else WallpaperLightOverlay
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(rootBackgroundColor)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        LockScreenService.lockScreen(context)
+                    }
+                )
+            }
     ) {
-        // Wallpaper darken scrim overlay if wallpaper mode is active & darken is enabled
+        // Wallpaper darken/lighten scrim overlay if wallpaper mode is active & darken is enabled
         if (settings.wallpaperMode == WallpaperMode.WALLPAPER && settings.darkenWallpaper) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(WallpaperDarkOverlay)
+                    .background(overlayColor)
             )
         }
 
@@ -154,7 +169,18 @@ fun LauncherScreen(
                         if (!isSearching) {
                             // Samsung One UI top reachability spacer: apps start at ~42% down the screen
                             item(key = "reachability_spacer") {
-                                Spacer(modifier = Modifier.height(screenHeightDp * 0.42f))
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(screenHeightDp * 0.42f)
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(
+                                                onDoubleTap = {
+                                                    LockScreenService.lockScreen(context)
+                                                }
+                                            )
+                                        }
+                                )
                             }
                         }
 

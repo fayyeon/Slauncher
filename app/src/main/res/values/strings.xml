@@ -9,8 +9,11 @@
     <string name="bg_section_title">Background Style</string>
     <string name="bg_mode_wallpaper">Current Wallpaper</string>
     <string name="bg_mode_wallpaper_desc">Displays transparent window over system wallpaper</string>
+    
     <string name="darken_wallpaper">Darken Wallpaper</string>
     <string name="darken_wallpaper_desc">Dim wallpaper overlay for higher text legibility</string>
+    <string name="lighten_wallpaper">Lighten Wallpaper</string>
+    <string name="lighten_wallpaper_desc">Brighten wallpaper overlay for higher text legibility</string>
     
     <string name="bg_mode_solid">Solid Color</string>
     <string name="bg_mode_solid_desc">Minimalist solid color (Dark / Light mode aware)</string>
@@ -19,13 +22,10 @@
     <string name="expressive_theming">Material Expressive Theme</string>
     <string name="expressive_theming_desc">Tint surfaces with system Dynamic Colors instead of stark pure black &amp; white</string>
     
-    <string name="system_shortcuts">System Shortcuts</string>
-    <string name="set_default_launcher">Default Launcher Settings</string>
-    <string name="set_default_launcher_desc">Make Slauncher your default home app</string>
-    <string name="open_wallpaper_settings">System Wallpaper</string>
-    <string name="open_wallpaper_settings_desc">Open Android wallpaper picker</string>
-    
     <string name="no_apps_found">No apps found</string>
     <string name="app_info">App Info</string>
     <string name="uninstall">Uninstall</string>
+    
+    <string name="accessibility_lock_desc">Allows Slauncher to turn off and lock the screen on double tap</string>
+    <string name="enable_accessibility_toast">Enable Slauncher in Accessibility to turn off screen with double tap</string>
 </resources>

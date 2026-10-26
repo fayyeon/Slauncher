@@ -12,7 +12,7 @@ val PureLightSearchBar = Color(0xFFE4E4E6)
 
 // Wallpaper Scrim Overlay
 val WallpaperDarkOverlay = Color(0x99000000) // ~60% black overlay
-val WallpaperLightOverlay = Color(0x33000000) // ~20% black overlay for contrast
+val WallpaperLightOverlay = Color(0xB3FFFFFF) // ~70% white overlay for high contrast in light mode
 
 // Material Expressive Fallback Palette (when dynamic system color isn't available)
 val ExpressiveDarkBackground = Color(0xFF111318)

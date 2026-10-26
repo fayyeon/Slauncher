@@ -125,6 +125,22 @@
       display: none;
     }
 
+    /* Screen lock overlay */
+    .screen-off-overlay {
+      position: absolute;
+      inset: 0;
+      background: #000000;
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666666;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 44px;
+    }
+
     /* Launcher root layout */
     .launcher-container {
       position: relative;
@@ -444,6 +460,13 @@
     <!-- Wallpaper Layer -->
     <div class="wallpaper-layer" id="wallpaperLayer"></div>
     
+    <!-- Screen off locked overlay -->
+    <div class="screen-off-overlay" id="screenOffOverlay">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="#555" style="margin-bottom: 8px;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      <span>Screen Locked</span>
+      <span style="font-size: 11px; color: #555; margin-top: 4px;">Click anywhere to wake</span>
+    </div>
+
     <!-- Darken Scrim Overlay -->
     <div class="darken-scrim" id="darkenScrim"></div>
 
@@ -658,6 +681,18 @@
         launcherContainer.style.backgroundColor = "transparent";
         darkenOption.style.display = "block";
         darkenScrim.style.display = isDarkenOn ? "block" : "none";
+        
+        const darkenTitle = document.querySelector("#darkenToggleRow h4");
+        const darkenDesc = document.querySelector("#darkenToggleRow p");
+        if (isDarkMode) {
+          if (darkenTitle) darkenTitle.textContent = "Darken Wallpaper";
+          if (darkenDesc) darkenDesc.textContent = "Dim wallpaper overlay for higher text legibility";
+          darkenScrim.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
+        } else {
+          if (darkenTitle) darkenTitle.textContent = "Lighten Wallpaper";
+          if (darkenDesc) darkenDesc.textContent = "Brighten wallpaper overlay for higher text legibility";
+          darkenScrim.style.backgroundColor = "rgba(255, 255, 255, 0.7)";
+        }
       } else {
         wallpaperLayer.style.display = "none";
         darkenScrim.style.display = "none";
@@ -758,6 +793,22 @@
     // Initial render
     renderApps();
     applyTheme();
+
+    // Double tap to lock screen simulation
+    let lastTap = 0;
+    const screenOffOverlay = document.getElementById("screenOffOverlay");
+    launcherContainer.addEventListener("click", (e) => {
+      if (e.target.closest(".search-box") || e.target.closest(".app-item") || e.target.closest(".menu-btn") || e.target.closest(".bottom-sheet")) return;
+      const now = Date.now();
+      if (now - lastTap < 350 && now - lastTap > 40) {
+        screenOffOverlay.style.display = "flex";
+      }
+      lastTap = now;
+    });
+
+    screenOffOverlay.addEventListener("click", () => {
+      screenOffOverlay.style.display = "none";
+    });
   </script>
 </body>
 </html>

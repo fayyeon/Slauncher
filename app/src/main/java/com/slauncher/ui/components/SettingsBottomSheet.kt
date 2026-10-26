@@ -1,6 +1,7 @@
 package com.slauncher.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -124,10 +125,11 @@ fun SettingsBottomSheet(
 
             // Sub-options depending on selected mode
             if (settings.wallpaperMode == WallpaperMode.WALLPAPER) {
-                // Option to darken the wallpaper
+                val isDark = isSystemInDarkTheme()
+                // Option to darken or lighten the wallpaper
                 ToggleRow(
-                    title = stringResource(R.string.darken_wallpaper),
-                    description = stringResource(R.string.darken_wallpaper_desc),
+                    title = stringResource(if (isDark) R.string.darken_wallpaper else R.string.lighten_wallpaper),
+                    description = stringResource(if (isDark) R.string.darken_wallpaper_desc else R.string.lighten_wallpaper_desc),
                     checked = settings.darkenWallpaper,
                     onCheckedChange = onDarkenWallpaperChange
                 )
